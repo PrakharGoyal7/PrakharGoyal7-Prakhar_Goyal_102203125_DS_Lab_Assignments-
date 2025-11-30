@@ -1,0 +1,152 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// ============================
+// QUESTION 1
+// Stack using array (menu)
+// ============================
+
+const int MAXN = 100;
+
+struct StackArr {
+    int a[MAXN];
+    int top = -1;
+} st;
+
+bool isEmptyArr() { return st.top == -1; }
+bool isFullArr()  { return st.top == MAXN - 1; }
+
+void pushArr(int x) {
+    if (isFullArr()) { cout << "Overflow\n"; return; }
+    st.a[++st.top] = x;
+}
+
+int popArr() {
+    if (isEmptyArr()) { cout << "Underflow\n"; return -1; }
+    return st.a[st.top--];
+}
+
+int peekArr() {
+    if (isEmptyArr()) { cout << "Empty\n"; return -1; }
+    return st.a[st.top];
+}
+
+void displayArrStack() {
+    if (isEmptyArr()) { cout << "Empty\n"; return; }
+    cout << "Stack (top to bottom): ";
+    for (int i = st.top; i >= 0; i--)
+        cout << st.a[i] << " ";
+    cout << "\n";
+}
+
+// ============================
+// QUESTION 2
+// Reverse string using stack
+// ============================
+
+string reverseUsingStack(const string &s) {
+    stack<char> st;
+    for (char c : s) st.push(c);
+    string res;
+    while (!st.empty()) {
+        res += st.top();
+        st.pop();
+    }
+    return res;
+}
+
+// ============================
+// QUESTION 3
+// Balanced parentheses
+// ============================
+
+bool isMatching(char open, char close) {
+    return (open=='(' && close==')') ||
+           (open=='[' && close==']') ||
+           (open=='{' && close=='}');
+}
+
+bool isBalanced(const string &s) {
+    stack<char> st;
+    for (char c : s) {
+        if (c=='(' || c=='[' || c=='{')
+            st.push(c);
+        else if (c==')' || c==']' || c=='}') {
+            if (st.empty() || !isMatching(st.top(), c))
+                return false;
+            st.pop();
+        }
+    }
+    return st.empty();
+}
+
+// ============================
+// QUESTION 4
+// Infix to postfix
+// ============================
+
+int prec(char c) {
+    if (c=='^') return 3;
+    if (c=='*' || c=='/' || c=='%') return 2;
+    if (c=='+' || c=='-') return 1;
+    return 0;
+}
+
+string infixToPostfix(const string &s) {
+    stack<char> st;
+    string out;
+    for (char c : s) {
+        if (isalnum(c)) out += c;
+        else if (c == '(') st.push(c);
+        else if (c == ')') {
+            while (!st.empty() && st.top() != '(') {
+                out += st.top(); st.pop();
+            }
+            if (!st.empty()) st.pop();
+        } else { // operator
+            while (!st.empty() && prec(st.top()) >= prec(c)) {
+                if (st.top() == '(') break;
+                out += st.top(); st.pop();
+            }
+            st.push(c);
+        }
+    }
+    while (!st.empty()) { out += st.top(); st.pop(); }
+    return out;
+}
+
+// ============================
+// QUESTION 5
+// Evaluate postfix expression
+// ============================
+
+int evalPostfix(const string &s) {
+    stack<int> st;
+    for (char c : s) {
+        if (isdigit(c)) {
+            st.push(c - '0');
+        } else {
+            int b = st.top(); st.pop();
+            int a = st.top(); st.pop();
+            int res;
+            switch (c) {
+            case '+': res = a + b; break;
+            case '-': res = a - b; break;
+            case '*': res = a * b; break;
+            case '/': res = a / b; break;
+            default:  res = 0;
+            }
+            st.push(res);
+        }
+    }
+    return st.top();
+}
+
+// ============================
+// MAIN (for testing)
+// ============================
+
+int main() {
+    // Add small tests if you want.
+    return 0;
+}
