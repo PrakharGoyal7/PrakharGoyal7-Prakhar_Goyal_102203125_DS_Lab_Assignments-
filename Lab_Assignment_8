@@ -1,0 +1,207 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// ============================
+// BST NODE
+// ============================
+
+struct TreeNode {
+    int key;
+    TreeNode *left, *right;
+    TreeNode(int k): key(k), left(NULL), right(NULL) {}
+};
+
+// ============================
+// QUESTION 1
+// Tree traversals (recursive)
+// ============================
+
+void preorder(TreeNode* root) {
+    if (!root) return;
+    cout << root->key << " ";
+    preorder(root->left);
+    preorder(root->right);
+}
+
+void inorder(TreeNode* root) {
+    if (!root) return;
+    inorder(root->left);
+    cout << root->key << " ";
+    inorder(root->right);
+}
+
+void postorder(TreeNode* root) {
+    if (!root) return;
+    postorder(root->left);
+    postorder(root->right);
+    cout << root->key << " ";
+}
+
+// ============================
+// QUESTION 2 & 3
+// BST insert, search, min, max, successor, predecessor, delete
+// ============================
+
+TreeNode* insertBST(TreeNode* root, int key) {
+    if (!root) return new TreeNode(key);
+    if (key < root->key) root->left = insertBST(root->left,key);
+    else if (key > root->key) root->right = insertBST(root->right,key);
+    return root;
+}
+
+TreeNode* searchRec(TreeNode* root, int key) {
+    if (!root || root->key == key) return root;
+    if (key < root->key) return searchRec(root->left,key);
+    return searchRec(root->right,key);
+}
+
+TreeNode* searchIter(TreeNode* root, int key) {
+    while (root && root->key != key) {
+        root = (key < root->key) ? root->left : root->right;
+    }
+    return root;
+}
+
+TreeNode* minNode(TreeNode* root) {
+    if (!root) return NULL;
+    while (root->left) root = root->left;
+    return root;
+}
+
+TreeNode* maxNode(TreeNode* root) {
+    if (!root) return NULL;
+    while (root->right) root = root->right;
+    return root;
+}
+
+TreeNode* inorderSuccessor(TreeNode* root, TreeNode* x) {
+    if (x->right) return minNode(x->right);
+    TreeNode* succ = NULL;
+    while (root) {
+        if (x->key < root->key) { succ = root; root = root->left; }
+        else if (x->key > root->key) root = root->right;
+        else break;
+    }
+    return succ;
+}
+
+TreeNode* inorderPredecessor(TreeNode* root, TreeNode* x) {
+    if (x->left) return maxNode(x->left);
+    TreeNode* pred = NULL;
+    while (root) {
+        if (x->key > root->key) { pred = root; root = root->right; }
+        else if (x->key < root->key) root = root->left;
+        else break;
+    }
+    return pred;
+}
+
+TreeNode* deleteBST(TreeNode* root, int key) {
+    if (!root) return NULL;
+    if (key < root->key) root->left = deleteBST(root->left,key);
+    else if (key > root->key) root->right = deleteBST(root->right,key);
+    else {
+        if (!root->left) {
+            TreeNode* r = root->right;
+            delete root; return r;
+        } else if (!root->right) {
+            TreeNode* l = root->left;
+            delete root; return l;
+        } else {
+            TreeNode* succ = minNode(root->right);
+            root->key = succ->key;
+            root->right = deleteBST(root->right, succ->key);
+        }
+    }
+    return root;
+}
+
+// ============================
+// QUESTION 3 extra
+// Max depth & min depth
+// ============================
+
+int maxDepth(TreeNode* root) {
+    if (!root) return 0;
+    return 1 + max(maxDepth(root->left), maxDepth(root->right));
+}
+
+int minDepth(TreeNode* root) {
+    if (!root) return 0;
+    if (!root->left) return 1 + minDepth(root->right);
+    if (!root->right) return 1 + minDepth(root->left);
+    return 1 + min(minDepth(root->left), minDepth(root->right));
+}
+
+// ============================
+// QUESTION 4
+// Check if binary tree is BST
+// ============================
+
+bool isBSTUtil(TreeNode* root, long long minV, long long maxV) {
+    if (!root) return true;
+    if (root->key <= minV || root->key >= maxV) return false;
+    return isBSTUtil(root->left, minV, root->key) &&
+           isBSTUtil(root->right, root->key, maxV);
+}
+
+bool isBST(TreeNode* root) {
+    return isBSTUtil(root, LLONG_MIN, LLONG_MAX);
+}
+
+// ============================
+// QUESTION 5 & 6
+// Heap sort + priority queue (min-heap)
+// ============================
+
+void heapify(int a[], int n, int i) {
+    int largest = i;
+    int l = 2*i+1, r = 2*i+2;
+    if (l<n && a[l]>a[largest]) largest = l;
+    if (r<n && a[r]>a[largest]) largest = r;
+    if (largest != i) {
+        swap(a[i], a[largest]);
+        heapify(a,n,largest);
+    }
+}
+
+void heapSort(int a[], int n) {
+    for (int i=n/2-1;i>=0;i--) heapify(a,n,i);
+    for (int i=n-1;i>0;i--) {
+        swap(a[0],a[i]);
+        heapify(a,i,0);
+    }
+}
+
+struct MinHeap {
+    vector<int> h;
+    void push(int x) {
+        h.push_back(x);
+        int i = h.size()-1;
+        while (i>0) {
+            int p = (i-1)/2;
+            if (h[p] <= h[i]) break;
+            swap(h[p],h[i]);
+            i = p;
+        }
+    }
+    void pop() {
+        if (h.empty()) return;
+        h[0] = h.back(); h.pop_back();
+        int n = h.size(), i=0;
+        while (true) {
+            int l=2*i+1, r=2*i+2, smallest=i;
+            if (l<n && h[l]<h[smallest]) smallest=l;
+            if (r<n && h[r]<h[smallest]) smallest=r;
+            if (smallest==i) break;
+            swap(h[i],h[smallest]);
+            i = smallest;
+        }
+    }
+    int top() { return h.empty()? -1 : h[0]; }
+    bool empty() { return h.empty(); }
+};
+
+int main() {
+    return 0;
+}
