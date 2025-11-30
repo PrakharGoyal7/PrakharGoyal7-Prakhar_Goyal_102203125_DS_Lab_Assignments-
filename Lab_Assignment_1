@@ -1,0 +1,209 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// ============================
+// QUESTION 1
+// Menu-driven array operations
+// ============================
+
+const int MAXN = 100;
+
+void createArray(int arr[], int &n) {
+    cout << "Enter number of elements: ";
+    cin >> n;
+    cout << "Enter " << n << " elements:\n";
+    for (int i = 0; i < n; i++) cin >> arr[i];
+}
+
+void displayArray(int arr[], int n) {
+    if (n == 0) { cout << "Array is empty\n"; return; }
+    cout << "Array: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << "\n";
+}
+
+void insertAtPos(int arr[], int &n) {
+    if (n == MAXN) { cout << "Overflow\n"; return; }
+    int pos, x;
+    cout << "Enter position (0-based) and value: ";
+    cin >> pos >> x;
+    if (pos < 0 || pos > n) { cout << "Invalid position\n"; return; }
+    for (int i = n; i > pos; i--)
+        arr[i] = arr[i - 1];
+    arr[pos] = x;
+    n++;
+}
+
+void deleteAtPos(int arr[], int &n) {
+    if (n == 0) { cout << "Underflow\n"; return; }
+    int pos;
+    cout << "Enter position (0-based) to delete: ";
+    cin >> pos;
+    if (pos < 0 || pos >= n) { cout << "Invalid position\n"; return; }
+    for (int i = pos; i < n - 1; i++)
+        arr[i] = arr[i + 1];
+    n--;
+}
+
+void linearSearch(int arr[], int n) {
+    int key;
+    cout << "Enter element to search: ";
+    cin >> key;
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == key) {
+            cout << "Found at index " << i << "\n";
+            return;
+        }
+    }
+    cout << "Not found\n";
+}
+
+// ============================
+// QUESTION 2
+// Remove duplicates from array
+// ============================
+
+int removeDuplicates(int arr[], int n) {
+    if (n == 0) return 0;
+    sort(arr, arr + n); // order not preserved
+    int j = 0;
+    for (int i = 1; i < n; i++) {
+        if (arr[i] != arr[j]) {
+            j++;
+            arr[j] = arr[i];
+        }
+    }
+    return j + 1;
+}
+
+// ============================
+// QUESTION 3
+// Output of given C program
+// (just for theory: output = 10000)
+// ============================
+
+// No code required in file; only answer: 10000
+
+// ============================
+// QUESTION 4(a)
+// Reverse an array
+// ============================
+
+void reverseArray(int arr[], int n) {
+    int i = 0, j = n - 1;
+    while (i < j) {
+        swap(arr[i], arr[j]);
+        i++; j--;
+    }
+}
+
+// ============================
+// QUESTION 4(b)
+// Matrix multiplication
+// ============================
+
+void matrixMultiply() {
+    int r1, c1, r2, c2;
+    cin >> r1 >> c1 >> r2 >> c2;
+    if (c1 != r2) { cout << "Not possible\n"; return; }
+
+    int A[50][50], B[50][50], C[50][50] = {0};
+    for (int i = 0; i < r1; i++)
+        for (int j = 0; j < c1; j++)
+            cin >> A[i][j];
+
+    for (int i = 0; i < r2; i++)
+        for (int j = 0; j < c2; j++)
+            cin >> B[i][j];
+
+    for (int i = 0; i < r1; i++)
+        for (int j = 0; j < c2; j++)
+            for (int k = 0; k < c1; k++)
+                C[i][j] += A[i][k] * B[k][j];
+
+    cout << "Result:\n";
+    for (int i = 0; i < r1; i++) {
+        for (int j = 0; j < c2; j++)
+            cout << C[i][j] << " ";
+        cout << "\n";
+    }
+}
+
+// ============================
+// QUESTION 4(c)
+// Transpose of matrix
+// ============================
+
+void transposeMatrix() {
+    int r, c;
+    cin >> r >> c;
+    int A[50][50], T[50][50];
+    for (int i = 0; i < r; i++)
+        for (int j = 0; j < c; j++)
+            cin >> A[i][j];
+
+    for (int i = 0; i < r; i++)
+        for (int j = 0; j < c; j++)
+            T[j][i] = A[i][j];
+
+    for (int i = 0; i < c; i++) {
+        for (int j = 0; j < r; j++)
+            cout << T[i][j] << " ";
+        cout << "\n";
+    }
+}
+
+// ============================
+// QUESTION 5
+// Sum of every row and column
+// ============================
+
+void rowColSum() {
+    int r, c;
+    cin >> r >> c;
+    int a[50][50];
+
+    for (int i = 0; i < r; i++)
+        for (int j = 0; j < c; j++)
+            cin >> a[i][j];
+
+    cout << "Row sums:\n";
+    for (int i = 0; i < r; i++) {
+        int sum = 0;
+        for (int j = 0; j < c; j++)
+            sum += a[i][j];
+        cout << "Row " << i << ": " << sum << "\n";
+    }
+
+    cout << "Column sums:\n";
+    for (int j = 0; j < c; j++) {
+        int sum = 0;
+        for (int i = 0; i < r; i++)
+            sum += a[i][j];
+        cout << "Col " << j << ": " << sum << "\n";
+    }
+}
+
+// ============================
+// MAIN (for demonstration only)
+// ============================
+
+int main() {
+    // You can call individual functions here for testing.
+    // Example: simple menu for Q1 array operations.
+
+    int arr[MAXN], n = 0, ch;
+    do {
+        cout << "\n1.CREATE 2.DISPLAY 3.INSERT 4.DELETE 5.SEARCH 6.EXIT\n";
+        cin >> ch;
+        switch (ch) {
+        case 1: createArray(arr, n); break;
+        case 2: displayArray(arr, n); break;
+        case 3: insertAtPos(arr, n); break;
+        case 4: deleteAtPos(arr, n); break;
+        case 5: linearSearch(arr, n); break;
+        }
+    } while (ch != 6);
+
+    return 0;
+}
