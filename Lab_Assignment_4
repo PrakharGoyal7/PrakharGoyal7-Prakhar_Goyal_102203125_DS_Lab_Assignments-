@@ -1,0 +1,162 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// ============================
+// QUESTION 1
+// Linear queue using array
+// ============================
+
+const int MAXN = 100;
+
+struct QueueArr {
+    int arr[MAXN];
+    int front = 0, rear = -1;
+} q;
+
+bool isEmptyQ() { return q.front > q.rear; }
+bool isFullQ()  { return q.rear == MAXN - 1; }
+
+void enqueueQ(int x) {
+    if (isFullQ()) { cout << "Overflow\n"; return; }
+    q.arr[++q.rear] = x;
+}
+
+int dequeueQ() {
+    if (isEmptyQ()) { cout << "Underflow\n"; return -1; }
+    return q.arr[q.front++];
+}
+
+int peekQ() {
+    if (isEmptyQ()) { cout << "Empty\n"; return -1; }
+    return q.arr[q.front];
+}
+
+void displayQ() {
+    if (isEmptyQ()) { cout << "Empty\n"; return; }
+    cout << "Queue: ";
+    for (int i = q.front; i <= q.rear; i++)
+        cout << q.arr[i] << " ";
+    cout << "\n";
+}
+
+// ============================
+// QUESTION 2
+// Circular queue using array
+// ============================
+
+struct CQueue {
+    int arr[MAXN];
+    int front = -1, rear = -1;
+} cq;
+
+bool isEmptyCQ() { return cq.front == -1; }
+bool isFullCQ() { return (cq.rear + 1) % MAXN == cq.front; }
+
+void enqueueCQ(int x) {
+    if (isFullCQ()) { cout << "Overflow\n"; return; }
+    if (isEmptyCQ()) cq.front = cq.rear = 0;
+    else cq.rear = (cq.rear + 1) % MAXN;
+    cq.arr[cq.rear] = x;
+}
+
+int dequeueCQ() {
+    if (isEmptyCQ()) { cout << "Underflow\n"; return -1; }
+    int val = cq.arr[cq.front];
+    if (cq.front == cq.rear) cq.front = cq.rear = -1;
+    else cq.front = (cq.front + 1) % MAXN;
+    return val;
+}
+
+int peekCQ() {
+    if (isEmptyCQ()) { cout << "Empty\n"; return -1; }
+    return cq.arr[cq.front];
+}
+
+void displayCQ() {
+    if (isEmptyCQ()) { cout << "Empty\n"; return; }
+    cout << "CQueue: ";
+    int i = cq.front;
+    while (true) {
+        cout << cq.arr[i] << " ";
+        if (i == cq.rear) break;
+        i = (i + 1) % MAXN;
+    }
+    cout << "\n";
+}
+
+// ============================
+// QUESTION 3
+// Interleave first and second half of a queue
+// ============================
+
+void interleaveQueue(queue<int> &qq) {
+    int n = qq.size();
+    if (n % 2 != 0) return;
+    int half = n / 2;
+    queue<int> q1;
+    for (int i = 0; i < half; i++) {
+        q1.push(qq.front()); qq.pop();
+    }
+    while (!q1.empty()) {
+        qq.push(q1.front()); q1.pop();
+        qq.push(qq.front()); qq.pop();
+    }
+}
+
+// ============================
+// QUESTION 4
+// First non-repeating character stream
+// ============================
+
+void streamFirstNonRepeating(const string &s) {
+    vector<int> freq(256, 0);
+    queue<char> qq;
+    for (char c : s) {
+        freq[c]++;
+        qq.push(c);
+        while (!qq.empty() && freq[qq.front()] > 1)
+            qq.pop();
+        if (qq.empty()) cout << -1 << " ";
+        else cout << qq.front() << " ";
+    }
+    cout << "\n";
+}
+
+// ============================
+// QUESTION 5
+// Stack using two queues / one queue
+// ============================
+
+struct Stack2Q {
+    queue<int> q1, q2;
+    void push(int x) {
+        q2.push(x);
+        while (!q1.empty()) { q2.push(q1.front()); q1.pop(); }
+        swap(q1, q2);
+    }
+    int pop() {
+        if (q1.empty()) return -1;
+        int x = q1.front(); q1.pop(); return x;
+    }
+    int top() { return q1.empty() ? -1 : q1.front(); }
+    bool empty() { return q1.empty(); }
+};
+
+struct Stack1Q {
+    queue<int> q;
+    void push(int x) {
+        int sz = q.size();
+        q.push(x);
+        while (sz--) { q.push(q.front()); q.pop(); }
+    }
+    int pop() {
+        if (q.empty()) return -1;
+        int x = q.front(); q.pop(); return x;
+    }
+    int top() { return q.empty() ? -1 : q.front(); }
+    bool empty() { return q.empty(); }
+};
+
+int main() {
+    return 0;
+}
