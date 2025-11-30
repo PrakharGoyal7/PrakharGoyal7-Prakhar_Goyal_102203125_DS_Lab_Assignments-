@@ -1,0 +1,203 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// ============================
+// QUESTION 1
+// Binary search (iterative)
+// ============================
+
+int binarySearch(int arr[], int n, int key) {
+    int l = 0, r = n - 1;
+    while (l <= r) {
+        int mid = l + (r - l) / 2;
+        if (arr[mid] == key) return mid;
+        else if (arr[mid] < key) l = mid + 1;
+        else r = mid - 1;
+    }
+    return -1;
+}
+
+// ============================
+// QUESTION 2
+// Bubble sort on fixed array
+// ============================
+
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - 1 - i; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}
+
+// ============================
+// QUESTION 3(a)
+// Find missing number (O(n))
+// ============================
+
+int missingLinear(int arr[], int n) { // arr size = n-1, numbers 1..n
+    int total = n * (n + 1) / 2;
+    int sum = 0;
+    for (int i = 0; i < n - 1; i++) sum += arr[i];
+    return total - sum;
+}
+
+// ============================
+// QUESTION 3(b)
+// Find missing number (O(log n))
+// using binary search
+// ============================
+
+int missingBinary(int arr[], int n) { // arr size = n-1 sorted 1..n
+    int l = 0, r = n - 2;
+    while (l <= r) {
+        int mid = l + (r - l) / 2;
+        if (arr[mid] == mid + 1) l = mid + 1;
+        else r = mid - 1;
+    }
+    return l + 1;
+}
+
+// ============================
+// QUESTION 4(a)
+// Concatenate two C-strings
+// ============================
+
+void myStrcat(char s1[], const char s2[]) {
+    int i = 0, j = 0;
+    while (s1[i] != '\0') i++;
+    while (s2[j] != '\0') {
+        s1[i++] = s2[j++];
+    }
+    s1[i] = '\0';
+}
+
+// ============================
+// QUESTION 4(b)
+// Reverse a C-string
+// ============================
+
+void reverseStr(char s[]) {
+    int i = 0, j = strlen(s) - 1;
+    while (i < j) {
+        swap(s[i], s[j]);
+        i++; j--;
+    }
+}
+
+// ============================
+// QUESTION 4(c)
+// Delete all vowels
+// ============================
+
+bool isVowel(char c) {
+    c = tolower(c);
+    return c=='a'||c=='e'||c=='i'||c=='o'||c=='u';
+}
+
+void removeVowels(char s[]) {
+    int j = 0;
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (!isVowel(s[i])) s[j++] = s[i];
+    }
+    s[j] = '\0';
+}
+
+// ============================
+// QUESTION 4(d)
+// Sort n strings alphabetically
+// ============================
+
+void sortStrings(vector<string> &v) {
+    sort(v.begin(), v.end());
+}
+
+// ============================
+// QUESTION 4(e)
+// Uppercase -> lowercase (single char)
+// ============================
+
+char toLowerChar(char c) {
+    if (c >= 'A' && c <= 'Z')
+        return c + ('a' - 'A');
+    return c;
+}
+
+// ============================
+// QUESTION 5
+// Efficient storage formulas
+// (Diagonal / Triangular / Symmetric / Tridiagonal)
+// -> usually theory + get/set functions
+// ============================
+
+// Example: lower triangular, row-major, 0-based:
+// index = i*(i+1)/2 + j, for i>=j
+
+// ============================
+// QUESTION 6
+// Sparse matrix transpose (triplet)
+// ============================
+
+struct Triple {
+    int r, c, v;
+};
+
+vector<Triple> fastTranspose(const vector<Triple> &a) {
+    int rows = a[0].r, cols = a[0].c, nz = a[0].v;
+    vector<Triple> b(nz + 1);
+    b[0] = {cols, rows, nz};
+    vector<int> colCount(cols, 0), index(cols, 0);
+
+    for (int i = 1; i <= nz; i++)
+        colCount[a[i].c]++;
+
+    index[0] = 1;
+    for (int i = 1; i < cols; i++)
+        index[i] = index[i-1] + colCount[i-1];
+
+    for (int i = 1; i <= nz; i++) {
+        int col = a[i].c;
+        int pos = index[col]++;
+        b[pos] = {a[i].c, a[i].r, a[i].v};
+    }
+    return b;
+}
+
+// (Addition & multiplication of sparse matrices can be added here)
+
+// ============================
+// QUESTION 7
+// Count inversions using merge sort
+// ============================
+
+long long mergeCount(vector<int> &a, int l, int r) {
+    if (l >= r) return 0;
+    int m = (l + r) / 2;
+    long long inv = 0;
+    inv += mergeCount(a, l, m);
+    inv += mergeCount(a, m + 1, r);
+    vector<int> temp;
+    int i = l, j = m + 1;
+    while (i <= m && j <= r) {
+        if (a[i] <= a[j]) temp.push_back(a[i++]);
+        else {
+            temp.push_back(a[j++]);
+            inv += (m - i + 1);
+        }
+    }
+    while (i <= m) temp.push_back(a[i++]);
+    while (j <= r) temp.push_back(a[j++]);
+    for (int k = 0; k < (int)temp.size(); k++)
+        a[l + k] = temp[k];
+    return inv;
+}
+
+int main() {
+    // Use this main for testing any of the above functions as needed.
+    return 0;
+}
