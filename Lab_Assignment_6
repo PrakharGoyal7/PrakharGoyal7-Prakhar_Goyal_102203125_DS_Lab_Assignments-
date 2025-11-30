@@ -1,0 +1,605 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+/*
+    UCS301 Data Structures
+    Lab Assignment 6 – Doubly and Circular Linked List
+
+    Contents:
+    QUESTION 1  – Menu-driven DLL & CLL (insert / delete / search / display)
+    QUESTION 2  – Display circular list, repeating head at end
+    QUESTION 3  – Size of DLL and CLL
+    QUESTION 4  – Check if DLL of chars is palindrome
+    QUESTION 5  – Check if a linked list is circular
+
+    ADDITIONAL QUESTION 1 – Split CLL into two halves
+    ADDITIONAL QUESTION 2 – Remove even-parity nodes from DLL & CLL
+    ADDITIONAL QUESTION 3 – Reverse every group of k nodes in DLL
+    ADDITIONAL QUESTION 4 – Correct random pointer in DLL
+    ADDITIONAL QUESTION 5 – 2D matrix -> 4-pointer DLL grid
+*/
+
+
+// ======================================================================
+// COMMON STRUCTS FOR MAIN QUESTIONS
+// ======================================================================
+
+// Doubly linked list node (int data)
+struct DNode {
+    int data;
+    DNode *prev, *next;
+    DNode(int x): data(x), prev(NULL), next(NULL) {}
+};
+
+// Circular singly linked list node (int data)
+struct CNode {
+    int data;
+    CNode *next;
+    CNode(int x): data(x), next(NULL) {}
+};
+
+// Simple singly linked list node (for circular-check Q5)
+struct SNode {
+    int data;
+    SNode* next;
+    SNode(int x): data(x), next(NULL) {}
+};
+
+// Heads
+DNode* headDLL = NULL;
+CNode* headCLL = NULL;
+
+
+// ======================================================================
+// QUESTION 1
+// Menu-driven: DLL and CLL
+//  (a) Insert: first, last, before/after specific node
+//  (b) Delete a specific node
+//  (c) Search for a node
+// ======================================================================
+
+// -------------------- DOUBLY LINKED LIST OPS --------------------
+
+void insertBegDLL(int x) {
+    DNode* n = new DNode(x);
+    n->next = headDLL;
+    if (headDLL) headDLL->prev = n;
+    headDLL = n;
+}
+
+void insertEndDLL(int x) {
+    DNode* n = new DNode(x);
+    if (!headDLL) { headDLL = n; return; }
+    DNode* p = headDLL;
+    while (p->next) p = p->next;
+    p->next = n;
+    n->prev = p;
+}
+
+DNode* searchDLL(int key) {
+    DNode* p = headDLL;
+    while (p && p->data != key) p = p->next;
+    return p;
+}
+
+void insertAfterDLL(int key, int x) {
+    DNode* p = searchDLL(key);
+    if (!p) { cout << "Key not found\n"; return; }
+    DNode* n = new DNode(x);
+    n->next = p->next;
+    n->prev = p;
+    if (p->next) p->next->prev = n;
+    p->next = n;
+}
+
+void insertBeforeDLL(int key, int x) {
+    DNode* p = searchDLL(key);
+    if (!p) { cout << "Key not found\n"; return; }
+    if (p == headDLL) { insertBegDLL(x); return; }
+    DNode* n = new DNode(x);
+    n->next = p;
+    n->prev = p->prev;
+    p->prev->next = n;
+    p->prev = n;
+}
+
+void deleteDLL(int key) {
+    if (!headDLL) { cout << "List empty\n"; return; }
+    DNode* p = headDLL;
+    while (p && p->data != key) p = p->next;
+    if (!p) { cout << "Key not found\n"; return; }
+
+    if (p == headDLL) headDLL = p->next;
+    if (p->next) p->next->prev = p->prev;
+    if (p->prev) p->prev->next = p->next;
+    delete p;
+}
+
+void displayDLL() {
+    DNode* p = headDLL;
+    cout << "DLL: ";
+    while (p) {
+        cout << p->data << " ";
+        p = p->next;
+    }
+    cout << "\n";
+}
+
+// -------------------- CIRCULAR SINGLY LINKED LIST OPS --------------------
+
+void insertBegCLL(int x) {
+    CNode* n = new CNode(x);
+    if (!headCLL) {
+        headCLL = n;
+        n->next = n;
+        return;
+    }
+    CNode* last = headCLL;
+    while (last->next != headCLL) last = last->next;
+    n->next = headCLL;
+    last->next = n;
+    headCLL = n;
+}
+
+void insertEndCLL(int x) {
+    CNode* n = new CNode(x);
+    if (!headCLL) {
+        headCLL = n;
+        n->next = n;
+        return;
+    }
+    CNode* last = headCLL;
+    while (last->next != headCLL) last = last->next;
+    last->next = n;
+    n->next = headCLL;
+}
+
+CNode* searchCLL(int key) {
+    if (!headCLL) return NULL;
+    CNode* p = headCLL;
+    do {
+        if (p->data == key) return p;
+        p = p->next;
+    } while (p != headCLL);
+    return NULL;
+}
+
+void insertAfterCLL(int key, int x) {
+    CNode* p = searchCLL(key);
+    if (!p) { cout << "Key not found\n"; return; }
+    CNode* n = new CNode(x);
+    n->next = p->next;
+    p->next = n;
+}
+
+void insertBeforeCLL(int key, int x) {
+    if (!headCLL) { cout << "List empty\n"; return; }
+    CNode* cur = headCLL;
+    CNode* prev = NULL;
+    do {
+        if (cur->data == key) {
+            CNode* n = new CNode(x);
+            if (cur == headCLL) {
+                CNode* last = headCLL;
+                while (last->next != headCLL) last = last->next;
+                n->next = headCLL;
+                last->next = n;
+                headCLL = n;
+            } else {
+                n->next = cur;
+                prev->next = n;
+            }
+            return;
+        }
+        prev = cur;
+        cur = cur->next;
+    } while (cur != headCLL);
+    cout << "Key not found\n";
+}
+
+void deleteCLL(int key) {
+    if (!headCLL) { cout << "List empty\n"; return; }
+    CNode *cur = headCLL, *prev = NULL;
+    do {
+        if (cur->data == key) {
+            if (cur == headCLL) {
+                if (headCLL->next == headCLL) { // only one node
+                    delete headCLL;
+                    headCLL = NULL;
+                    return;
+                }
+                CNode* last = headCLL;
+                while (last->next != headCLL) last = last->next;
+                headCLL = headCLL->next;
+                last->next = headCLL;
+                delete cur;
+            } else {
+                prev->next = cur->next;
+                delete cur;
+            }
+            return;
+        }
+        prev = cur;
+        cur = cur->next;
+    } while (cur != headCLL);
+    cout << "Key not found\n";
+}
+
+void displayCLL() {
+    if (!headCLL) { cout << "CLL empty\n"; return; }
+    CNode* p = headCLL;
+    cout << "CLL: ";
+    do {
+        cout << p->data << " ";
+        p = p->next;
+    } while (p != headCLL);
+    cout << "\n";
+}
+
+
+// ======================================================================
+// QUESTION 2
+// Display all node values in CLL, repeating head at the end
+// ======================================================================
+
+void displayCLLRepeatHead(CNode* head) {
+    if (!head) { cout << "List empty\n"; return; }
+    CNode* p = head;
+    cout << "CLL with head repeated: ";
+    do {
+        cout << p->data << " ";
+        p = p->next;
+    } while (p != head);
+    cout << head->data << "\n";
+}
+
+
+// ======================================================================
+// QUESTION 3
+// Size of DLL and CLL
+// ======================================================================
+
+int sizeDLL(DNode* head) {
+    int cnt = 0;
+    while (head) { cnt++; head = head->next; }
+    return cnt;
+}
+
+int sizeCLL(CNode* head) {
+    if (!head) return 0;
+    int cnt = 0;
+    CNode* p = head;
+    do {
+        cnt++;
+        p = p->next;
+    } while (p != head);
+    return cnt;
+}
+
+
+// ======================================================================
+// QUESTION 4
+// Check if a doubly linked list of characters is palindrome
+// ======================================================================
+
+struct DCharNode {
+    char data;
+    DCharNode *prev, *next;
+    DCharNode(char c): data(c), prev(NULL), next(NULL) {}
+};
+
+bool isPalindromeDLL(DCharNode* head) {
+    if (!head || !head->next) return true;
+    DCharNode* left = head;
+    DCharNode* right = head;
+    while (right->next) right = right->next; // go to last node
+    while (left != right && right->next != left) {
+        if (left->data != right->data) return false;
+        left = left->next;
+        right = right->prev;
+    }
+    return true;
+}
+
+
+// ======================================================================
+// QUESTION 5
+// Check if a linked list is Circular Linked List or not
+// ======================================================================
+
+bool isCircular(SNode* head) {
+    if (!head) return false;
+    SNode* p = head->next;
+    while (p && p != head) p = p->next;
+    return (p == head);
+}
+
+
+// ======================================================================
+// ADDITIONAL QUESTION 1
+// Split a circular linked list into two halves
+// first list has one extra node if odd
+// ======================================================================
+
+void splitCLL(CNode* head, CNode* &head1, CNode* &head2) {
+    head1 = head2 = NULL;
+    if (!head) return;
+    if (head->next == head) {
+        head1 = head;
+        head2 = NULL;
+        return;
+    }
+
+    CNode *slow = head, *fast = head;
+    // find middle (slow) & last (fast)
+    while (fast->next != head && fast->next->next != head) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    if (fast->next->next == head)
+        fast = fast->next;  // even case
+
+    head1 = head;
+    head2 = slow->next;
+
+    // make first half circular
+    slow->next = head1;
+    // make second half circular
+    fast->next = head2;
+}
+
+
+// ======================================================================
+// ADDITIONAL QUESTION 2
+// Remove all nodes with even parity of 1-bits in value
+//   (A) from DLL
+//   (B) from CLL
+// ======================================================================
+
+int bitCount(int x) {
+    int cnt = 0;
+    while (x) {
+        cnt += (x & 1);
+        x >>= 1;
+    }
+    return cnt;
+}
+
+bool evenParity(int x) {
+    return (bitCount(x) % 2 == 0);
+}
+
+// ------ (A) DLL ------
+
+void removeEvenParityDLL(DNode* &head) {
+    DNode* cur = head;
+    while (cur) {
+        DNode* nxt = cur->next;
+        if (evenParity(cur->data)) {
+            if (cur == head) head = cur->next;
+            if (cur->next) cur->next->prev = cur->prev;
+            if (cur->prev) cur->prev->next = cur->next;
+            delete cur;
+        }
+        cur = nxt;
+    }
+}
+
+// ------ (B) CLL ------
+
+void removeEvenParityCLL(CNode* &head) {
+    if (!head) return;
+
+    CNode* cur = head;
+    CNode* prev = NULL;
+    bool firstPass = true;
+
+    while (true) {
+        CNode* nxt = cur->next;
+        bool del = evenParity(cur->data);
+        if (del) {
+            if (cur == head) {
+                if (head->next == head) {
+                    delete head;
+                    head = NULL;
+                    return;
+                }
+                CNode* last = head;
+                while (last->next != head) last = last->next;
+                head = head->next;
+                last->next = head;
+                delete cur;
+                cur = head;
+                prev = last;
+            } else {
+                prev->next = cur->next;
+                delete cur;
+                cur = prev->next;
+            }
+        } else {
+            prev = cur;
+            cur = nxt;
+        }
+
+        if (!head) return;
+        if (cur == head && !firstPass) break;
+        firstPass = false;
+    }
+}
+
+
+// ======================================================================
+// ADDITIONAL QUESTION 3
+// Reverse every group of k nodes in a DLL
+// ======================================================================
+
+DNode* reverseKGroupDLL(DNode* head, int k) {
+    if (!head || k <= 1) return head;
+    DNode* cur = head;
+    DNode* newHead = NULL;
+    DNode* groupPrevTail = NULL;
+
+    while (cur) {
+        DNode* groupHead = cur;
+        int cnt = 0;
+        // check if there are at least k nodes – or just reverse remaining too
+        while (cnt < k && cur) {
+            cur = cur->next;
+            cnt++;
+        }
+        // reverse [groupHead, cur) of length cnt
+        DNode* p = groupHead;
+        DNode* prev = cur; // node after group
+        while (cnt--) {
+            DNode* nxt = p->next;
+            p->next = prev;
+            if (prev) prev->prev = p;
+            prev = p;
+            p = nxt;
+        }
+        // prev is new head of this reversed group
+        if (!newHead) newHead = prev;
+        if (groupPrevTail) {
+            groupPrevTail->next = prev;
+            prev->prev = groupPrevTail;
+        }
+        groupPrevTail = groupHead;
+    }
+    if (newHead) newHead->prev = NULL;
+    return newHead;
+}
+
+
+// ======================================================================
+// ADDITIONAL QUESTION 4
+// Correct the random pointer in a DLL
+// (Generic pattern – example: random should point to next node)
+// ======================================================================
+
+struct RNode {
+    int data;
+    RNode *prev, *next, *random;
+    RNode(int x): data(x), prev(NULL), next(NULL), random(NULL) {}
+};
+
+// Example rule: correct random pointers so that
+//      random of each node points to its next node (or NULL if last)
+
+void correctRandomPointers(RNode* head) {
+    RNode* cur = head;
+    while (cur) {
+        cur->random = cur->next;    // expected node
+        cur = cur->next;
+    }
+}
+
+// If the problem had some other rule (like random should point to symmetric node)
+// you would change the assignment above accordingly.
+
+
+// ======================================================================
+// ADDITIONAL QUESTION 5
+// Convert a 2D matrix to 4-pointer DLL grid
+// (next, prev, up, down)
+// ======================================================================
+
+struct MNode {
+    int data;
+    MNode *next, *prev, *up, *down;
+    MNode(int x): data(x), next(NULL), prev(NULL), up(NULL), down(NULL) {}
+};
+
+MNode* matrixToDLLGrid(vector<vector<int>> &mat) {
+    int r = mat.size();
+    if (r == 0) return NULL;
+    int c = mat[0].size();
+    if (c == 0) return NULL;
+
+    vector<vector<MNode*>> nodes(r, vector<MNode*>(c, NULL));
+
+    // create nodes
+    for (int i = 0; i < r; i++)
+        for (int j = 0; j < c; j++)
+            nodes[i][j] = new MNode(mat[i][j]);
+
+    // link pointers
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            if (j+1 < c) {
+                nodes[i][j]->next = nodes[i][j+1];
+                nodes[i][j+1]->prev = nodes[i][j];
+            }
+            if (i+1 < r) {
+                nodes[i][j]->down = nodes[i+1][j];
+                nodes[i+1][j]->up = nodes[i][j];
+            }
+        }
+    }
+    // return top-left node
+    return nodes[0][0];
+}
+
+
+// ======================================================================
+// MAIN (Optional simple menu for Q1, you can modify as you like)
+// ======================================================================
+
+int main() {
+    int choice;
+    while (true) {
+        cout << "\n===== LAB 6 MENU (DLL & CLL) =====\n";
+        cout << "1. DLL Insert (beg/end/before/after)\n";
+        cout << "2. DLL Delete key\n";
+        cout << "3. DLL Search key\n";
+        cout << "4. DLL Display\n";
+        cout << "5. CLL Insert (beg/end/before/after)\n";
+        cout << "6. CLL Delete key\n";
+        cout << "7. CLL Search key\n";
+        cout << "8. CLL Display\n";
+        cout << "9. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 9) break;
+
+        int x, key;
+        switch (choice) {
+        case 1:
+            cout << "1.Begin 2.End 3.Before 4.After: ";
+            cin >> choice;
+            if (choice == 1) { cout << "Value: "; cin >> x; insertBegDLL(x); }
+            else if (choice == 2) { cout << "Value: "; cin >> x; insertEndDLL(x); }
+            else if (choice == 3) { cout << "Key, Value: "; cin >> key >> x; insertBeforeDLL(key,x); }
+            else if (choice == 4) { cout << "Key, Value: "; cin >> key >> x; insertAfterDLL(key,x); }
+            break;
+        case 2:
+            cout << "Key: "; cin >> key; deleteDLL(key); break;
+        case 3:
+            cout << "Key: "; cin >> key;
+            cout << (searchDLL(key) ? "Found\n" : "Not Found\n");
+            break;
+        case 4:
+            displayDLL(); break;
+        case 5:
+            cout << "1.Begin 2.End 3.Before 4.After: ";
+            cin >> choice;
+            if (choice == 1) { cout << "Value: "; cin >> x; insertBegCLL(x); }
+            else if (choice == 2) { cout << "Value: "; cin >> x; insertEndCLL(x); }
+            else if (choice == 3) { cout << "Key, Value: "; cin >> key >> x; insertBeforeCLL(key,x); }
+            else if (choice == 4) { cout << "Key, Value: "; cin >> key >> x; insertAfterCLL(key,x); }
+            break;
+        case 6:
+            cout << "Key: "; cin >> key; deleteCLL(key); break;
+        case 7:
+            cout << "Key: "; cin >> key;
+            cout << (searchCLL(key) ? "Found\n" : "Not Found\n");
+            break;
+        case 8:
+            displayCLL(); break;
+        default:
+            cout << "Invalid\n";
+        }
+    }
+
+    return 0;
+}
